@@ -15,17 +15,41 @@ function createWindow(): void {
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
-      webSecurity: false
+      webSecurity: false,
+      devTools: isDev  // 개발 모드에서만 개발자 도구 활성화
     },
-    icon: path.join(__dirname, '../assets/icon.png')
+    icon: path.join(__dirname, '../assets/icon.png'),
+    autoHideMenuBar: true,  // 메뉴바 자동 숨김
+    show: false  // 창 생성 시 즉시 표시하지 않음
   });
 
-  if (isDev) {
-    mainWindow.loadFile(path.join(__dirname, 'index.html'));
-    mainWindow.webContents.openDevTools();
-  } else {
-    mainWindow.loadFile(path.join(__dirname, 'index.html'));
+  // 메뉴바 완전 제거
+  mainWindow.setMenuBarVisibility(false);
+  
+  // 프로덕션 모드에서만 개발자 도구 단축키 비활성화
+  if (!isDev) {
+    mainWindow.webContents.on('before-input-event', (event, input) => {
+      // F12, Ctrl+Shift+I, Ctrl+Shift+J 등 개발자 도구 단축키 차단
+      if (input.key === 'F12' || 
+          (input.control && input.shift && input.key === 'I') ||
+          (input.control && input.shift && input.key === 'J') ||
+          (input.control && input.shift && input.key === 'C')) {
+        event.preventDefault();
+      }
+    });
   }
+
+  // 페이지 로드 완료 후 창 표시
+  mainWindow.webContents.once('ready-to-show', () => {
+    mainWindow.show();
+    
+    // 개발 모드에서만 개발자 도구 열기
+    if (isDev) {
+      mainWindow.webContents.openDevTools();
+    }
+  });
+
+  mainWindow.loadFile(path.join(__dirname, 'index.html'));
 
   mainWindow.on('closed', () => {
     mainWindow = null as any;
@@ -151,4 +175,52 @@ ipcMain.handle('show-save-dialog', async (event, options: any) => {
 ipcMain.handle('show-open-dialog', async (event, options: any) => {
   const result = await dialog.showOpenDialog(mainWindow, options);
   return result;
+});
+
+// 프리셋 저장 핸들러
+ipcMain.handle('save-preset', async (event, preset: any, filePath: string) => {
+  try {
+    const presetData = {
+      name: preset.name,
+      description: preset.description,
+      settings: {
+        includeHeader: preset.includeHeader,
+        separator: preset.separator,
+        customSeparator: preset.customSeparator,
+        includeDataInLength: preset.includeDataInLength,
+        columnConfigs: preset.columnConfigs
+      },
+      createdAt: new Date().toISOString()
+    };
+    
+    fs.writeFileSync(filePath, JSON.stringify(presetData, null, 2));
+    
+    return {
+      success: true,
+      message: '프리셋이 저장되었습니다.'
+    };
+  } catch (error: any) {
+    return {
+      success: false,
+      error: error.message
+    };
+  }
+});
+
+// 프리셋 로드 핸들러
+ipcMain.handle('load-preset', async (event, filePath: string) => {
+  try {
+    const fileContent = fs.readFileSync(filePath, 'utf-8');
+    const presetData = JSON.parse(fileContent);
+    
+    return {
+      success: true,
+      data: presetData
+    };
+  } catch (error: any) {
+    return {
+      success: false,
+      error: error.message
+    };
+  }
 });

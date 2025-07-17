@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Tabs, Card, Tag, Space, Typography, Statistic } from 'antd';
-import { FileTextOutlined, SwapOutlined, BarChartOutlined } from '@ant-design/icons';
+import { Table, Tabs, Card, Tag, Space, Typography, Statistic, Alert } from 'antd';
+import { FileTextOutlined, SwapOutlined, BarChartOutlined, InfoCircleOutlined } from '@ant-design/icons';
 
 const { Title, Text } = Typography;
 
@@ -34,7 +34,13 @@ const DataPreview: React.FC<DataPreviewProps> = ({ originalData, transformedData
 
   useEffect(() => {
     if (transformedData && transformedData.length > 0) {
-      const columns = Object.keys(transformedData[0]).map((key, index) => ({
+      const allKeys = Object.keys(transformedData[0]);
+      
+      // 대용량 데이터의 경우 처음 50개 컬럼만 표시
+      const MAX_COLUMNS = 50;
+      const keysToShow = allKeys.slice(0, MAX_COLUMNS);
+      
+      const columns = keysToShow.map((key, index) => ({
         title: key,
         dataIndex: key,
         key: key,
@@ -46,6 +52,7 @@ const DataPreview: React.FC<DataPreviewProps> = ({ originalData, transformedData
           </Text>
         )
       }));
+      
       setTransformedColumns(columns);
     }
   }, [transformedData]);
@@ -130,6 +137,17 @@ const DataPreview: React.FC<DataPreviewProps> = ({ originalData, transformedData
             />
           </Space>
           
+          {transformedStats.columns > 50 && (
+            <Alert
+              message="대용량 데이터 알림"
+              description={`총 ${transformedStats.columns.toLocaleString()}개의 컬럼 중 처음 50개만 표시됩니다. 전체 데이터를 확인하려면 파일로 저장하세요.`}
+              type="info"
+              icon={<InfoCircleOutlined />}
+              style={{ marginBottom: 16 }}
+              showIcon
+            />
+          )}
+          
           <Table
             columns={transformedColumns}
             dataSource={transformedData}
@@ -143,6 +161,7 @@ const DataPreview: React.FC<DataPreviewProps> = ({ originalData, transformedData
             scroll={{ x: 'max-content', y: 400 }}
             size="small"
             bordered
+            loading={transformedStats.columns > 1000 && transformedColumns.length === 0}
           />
         </div>
       )
