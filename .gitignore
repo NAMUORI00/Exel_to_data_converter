@@ -172,3 +172,8 @@ Temporary Items
 # Claude Code temporary files
 .@/
 .@*
+
+# Hidden files and directories (starting with .)
+.*
+!.gitignore
+!.env.example
