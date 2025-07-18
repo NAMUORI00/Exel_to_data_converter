@@ -127,12 +127,16 @@ ipcMain.handle('save-excel-file', async (event, data: any[], filePath: string) =
     const worksheet = workbook.addWorksheet('Sheet1');
     
     if (data.length > 0) {
-      const headers = Object.keys(data[0]);
-      worksheet.addRow(headers);
-      
+      // 배열 형태의 데이터를 직접 저장 (헤더 없이)
       data.forEach(row => {
-        const values = headers.map(header => row[header]);
-        worksheet.addRow(values);
+        if (Array.isArray(row)) {
+          // 배열인 경우 바로 추가
+          worksheet.addRow(row);
+        } else {
+          // 객체인 경우 값만 추출해서 추가
+          const values = Object.values(row);
+          worksheet.addRow(values);
+        }
       });
     }
     
@@ -152,7 +156,10 @@ ipcMain.handle('save-excel-file', async (event, data: any[], filePath: string) =
 
 ipcMain.handle('save-csv-file', async (event, data: any[], filePath: string) => {
   try {
-    const csv = Papa.unparse(data);
+    // 배열 형태의 데이터를 헤더 없이 CSV로 변환
+    const csv = Papa.unparse(data, {
+      header: false  // 헤더 없이 데이터만 저장
+    });
     fs.writeFileSync(filePath, csv);
     
     return {
