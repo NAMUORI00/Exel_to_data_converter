@@ -110,6 +110,51 @@ excel-data-converter/
 └── tsconfig.json
 ```
 
+## 빌드 가이드
+
+### 개발 환경 설정
+프로젝트 개발을 위한 환경 설정 및 빌드 방법을 안내합니다.
+
+### 주요 빌드 명령어
+
+#### 개발 중
+```bash
+npm run dev          # 개발 모드 (핫 리로드, 개발 시 권장)
+npm run build:watch  # 개발 빌드 (파일 변경 감지)
+```
+
+#### 프로덕션 빌드
+```bash
+npm run build        # 프로덕션 빌드
+npm start           # 프로덕션 빌드 실행
+```
+
+#### 배포 패키지 생성
+```bash
+npm run build:win   # Windows 실행 파일 (.exe) 생성
+```
+
+### 빌드 환경 주의사항
+
+#### WSL2 환경에서의 Windows 빌드
+- **문제점**: WSL2에서는 심볼릭 링크 권한 문제로 인해 Windows 실행 파일 빌드가 제한될 수 있습니다
+- **해결방안**: Windows 실행 파일 빌드는 Windows PowerShell에서 관리자 권한으로 실행하는 것을 권장합니다
+- **자세한 문제 해결**: `BUILD-WINDOWS.md` 파일을 참조하세요
+
+#### 빌드 타겟 환경
+- **개발 환경**: WSL2 Ubuntu
+- **배포 타겟**: Windows 10/11
+- **빌드 시스템**: Webpack 5 + TypeScript
+
+### 아키텍처 개요
+
+#### 이중 프로세스 구조
+- **메인 프로세스** (`src/main.ts`): 파일 I/O, 시스템 대화상자, IPC 통신 처리
+- **렌더러 프로세스** (`src/renderer/`): React 기반 UI
+
+#### 보안 설정
+개발 편의성을 위해 `nodeIntegration: true` 및 `contextIsolation: false`를 사용합니다. 프로덕션 배포 시에는 보안 강화를 위해 이 설정들을 검토해야 합니다.
+
 ## 개발 스크립트
 
 - `npm start`: 프로덕션 빌드 실행
