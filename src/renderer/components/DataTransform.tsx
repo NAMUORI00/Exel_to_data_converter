@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Button, InputNumber, Space, Typography, Divider, message, Card, Table, Input, Switch, Select, Row, Col, Checkbox, Modal, Form, Progress } from 'antd';
-import { SwapOutlined, PlayCircleOutlined, SaveOutlined, FolderOpenOutlined } from '@ant-design/icons';
+import { Button, InputNumber, Space, Typography, Divider, message, Card, Table, Input, Switch, Select, Row, Col, Checkbox, Modal, Form, Progress, Tabs, Alert, Collapse } from 'antd';
+import { SwapOutlined, PlayCircleOutlined, SaveOutlined, FolderOpenOutlined, SettingOutlined, InfoCircleOutlined } from '@ant-design/icons';
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -57,6 +57,29 @@ const DataTransform: React.FC<DataTransformProps> = ({ data, onTransform }) => {
 
     if (getEnabledConfigs().length === 0) {
       message.warning('선택된 컬럼이 없습니다.');
+      return;
+    }
+
+    // Excel 열 제한 검증 (16,384개 제한)
+    const totalCells = getTotalCells();
+    if (totalCells > 16384) {
+      Modal.error({
+        title: 'Excel 열 제한 초과',
+        content: (
+          <div>
+            <p>생성될 셀 수가 Excel의 최대 열 제한(16,384개)을 초과합니다.</p>
+            <p><strong>현재 설정으로 생성될 셀 수: {totalCells.toLocaleString()}개</strong></p>
+            <p>다음 방법을 시도해보세요:</p>
+            <ul>
+              <li>컬럼 수를 줄이거나 비활성화</li>
+              <li>각 컬럼의 셀 길이를 줄임</li>
+              <li>데이터 행 수를 줄임</li>
+              <li>CSV 형식으로 저장 (열 제한 없음)</li>
+            </ul>
+          </div>
+        ),
+        width: 500
+      });
       return;
     }
 
@@ -120,33 +143,10 @@ const DataTransform: React.FC<DataTransformProps> = ({ data, onTransform }) => {
         }
       }
 
-      // 결과를 객체 형태로 변환 (Excel/CSV 호환)
+      // 결과를 배열 형태로 변환 (컬럼명 없이 데이터만)
       setProgressText('결과 데이터 생성 중...');
-      const transformedData = [{}];
+      const transformedData = [resultCells];
       
-      // 대용량 데이터를 위한 최적화된 객체 생성
-      const CELL_CHUNK_SIZE = 10000;
-      const totalCellChunks = Math.ceil(resultCells.length / CELL_CHUNK_SIZE);
-      
-      for (let chunkIndex = 0; chunkIndex < totalCellChunks; chunkIndex++) {
-        const start = chunkIndex * CELL_CHUNK_SIZE;
-        const end = Math.min(start + CELL_CHUNK_SIZE, resultCells.length);
-        
-        for (let i = start; i < end; i++) {
-          transformedData[0][`컬럼_${i + 1}`] = resultCells[i];
-        }
-        
-        // 진행률 업데이트 (50%~100%)
-        const progressPercent = 50 + Math.round((chunkIndex + 1) / totalCellChunks * 50);
-        setProgress(progressPercent);
-        setProgressText(`결과 데이터 생성 중... (${chunkIndex + 1}/${totalCellChunks})`);
-        
-        // UI 블로킹 방지
-        if (chunkIndex % 5 === 0) {
-          await new Promise(resolve => setTimeout(resolve, 1));
-        }
-      }
-
       setProgress(100);
       setProgressText('변환 완료!');
       
@@ -535,133 +535,36 @@ const DataTransform: React.FC<DataTransformProps> = ({ data, onTransform }) => {
 
   return (
     <Space direction="vertical" style={{ width: '100%' }}>
-      {/* 프리셋 관리 */}
-      <Card size="small" style={{ marginBottom: 16 }}>
-        <div style={{ marginBottom: 12 }}>
-          <Text strong>프리셋 관리</Text>
-        </div>
-        <Row gutter={[8, 8]}>
-          <Col span={12}>
-            <Button
-              icon={<SaveOutlined />}
-              onClick={handleSavePreset}
-              style={{ width: '100%' }}
-              size="small"
-            >
-              프리셋 저장
-            </Button>
-          </Col>
-          <Col span={12}>
-            <Button
-              icon={<FolderOpenOutlined />}
-              onClick={handleLoadPreset}
-              style={{ width: '100%' }}
-              size="small"
-            >
-              프리셋 불러오기
-            </Button>
-          </Col>
-        </Row>
-      </Card>
+      {/* Excel 열 제한 경고 */}
+      {getTotalCells() > 16384 && (
+        <Alert
+          type="warning"
+          showIcon
+          message="Excel 열 제한 초과"
+          description={
+            <div>
+              생성될 셀 수 {getTotalCells().toLocaleString()}개가 Excel 한계(16,384개)를 초과합니다. 
+              CSV 저장을 권장하거나 설정을 조정해주세요.
+            </div>
+          }
+          style={{ marginBottom: 16 }}
+        />
+      )}
 
-      {/* 기본 설정 */}
-      <Card size="small" style={{ marginBottom: 16 }}>
-        <div style={{ marginBottom: 12 }}>
-          <Text strong>기본 설정</Text>
-        </div>
-        <Space direction="vertical" style={{ width: '100%' }}>
-          <Row gutter={[8, 8]}>
-            <Col span={6}>
-              <Text style={{ fontSize: '11px', display: 'block', marginBottom: 4 }}>헤더 포함</Text>
-              <Switch
-                checked={includeHeader}
-                onChange={setIncludeHeader}
-                size="small"
-              />
-            </Col>
-            <Col span={6}>
-              <Text style={{ fontSize: '11px', display: 'block', marginBottom: 4 }}>데이터 길이 포함</Text>
-              <Switch
-                checked={includeDataInLength}
-                onChange={handleIncludeDataInLengthChange}
-                size="small"
-              />
-            </Col>
-            <Col span={12}>
-              <Text style={{ fontSize: '11px', display: 'block', marginBottom: 4 }}>셀 간 구분자</Text>
-              <Select
-                value={separator}
-                onChange={setSeparator}
-                style={{ width: '100%' }}
-                size="small"
-              >
-                <Option value="">없음</Option>
-                <Option value=" ">공백</Option>
-                <Option value="-">대시</Option>
-                <Option value="_">언더바</Option>
-                <Option value="custom">커스텀</Option>
-              </Select>
-            </Col>
-          </Row>
-          
-          {separator === 'custom' && (
-            <Row>
-              <Col span={12}>
-                <Text style={{ fontSize: '11px', display: 'block', marginBottom: 4 }}>커스텀 구분자</Text>
-                <Input
-                  value={customSeparator}
-                  onChange={(e) => setCustomSeparator(e.target.value)}
-                  placeholder="구분자 입력"
-                  size="small"
-                  maxLength={5}
-                />
-              </Col>
-            </Row>
-          )}
-        </Space>
-      </Card>
+      {/* 변환 실행 버튼 */}
+      <Button
+        type="primary"
+        size="large"
+        icon={<PlayCircleOutlined />}
+        onClick={handleTransform}
+        loading={loading}
+        disabled={getEnabledConfigs().length === 0}
+        style={{ width: '100%', height: '50px', fontSize: '16px' }}
+      >
+        1행으로 통합 변환
+      </Button>
 
-      {/* 컬럼별 셀 길이 설정 */}
-      <div>
-        <Text strong>컬럼별 셀 길이 설정</Text>
-        <Divider style={{ margin: '8px 0' }} />
-      </div>
-
-      <Table
-        columns={tableColumns}
-        dataSource={columnConfigs}
-        pagination={false}
-        size="small"
-        rowKey="name"
-        style={{ marginBottom: 16 }}
-      />
-
-      <Card size="small" style={{ marginBottom: 16 }}>
-        <Text type="secondary" style={{ fontSize: '11px' }}>
-          {includeHeader ? '헤더 + 첫 번째 행 미리보기:' : '첫 번째 행 미리보기:'}
-        </Text>
-        <div style={{ 
-          marginTop: 4, 
-          padding: '4px 8px', 
-          background: '#f5f5f5', 
-          borderRadius: '4px',
-          fontSize: '12px',
-          wordBreak: 'break-all',
-          fontFamily: 'monospace'
-        }}>
-          {getPreview()}
-        </div>
-      </Card>
-
-      <Card size="small" style={{ marginBottom: 16 }}>
-        <div style={{ fontSize: '11px', color: '#666' }}>
-          <div>• 총 행 수: {data.length}개 {includeHeader ? '(헤더 포함)' : ''}</div>
-          <div>• 선택된 컬럼: {getEnabledConfigs().length}개 / 전체 {columnConfigs.length}개</div>
-          <div>• 행당 셀 수: {getCellsPerRow()}개 {includeDataInLength ? '(데이터 포함)' : '(데이터 + 빈칸)'}</div>
-          <div>• 최종 총 셀 수: {getTotalCells()}개</div>
-        </div>
-      </Card>
-
+      {/* 진행률 표시 */}
       {loading && progress > 0 && (
         <Card size="small" style={{ marginBottom: 16 }}>
           <div style={{ marginBottom: 8 }}>
@@ -676,16 +579,162 @@ const DataTransform: React.FC<DataTransformProps> = ({ data, onTransform }) => {
         </Card>
       )}
 
-      <Button
-        type="primary"
-        icon={<PlayCircleOutlined />}
-        onClick={handleTransform}
-        loading={loading}
-        disabled={getEnabledConfigs().length === 0}
-        style={{ width: '100%' }}
-      >
-        1행으로 통합 변환
-      </Button>
+      {/* 설정 탭 */}
+      <Tabs 
+        defaultActiveKey="1"
+        items={[
+          {
+            key: '1',
+            label: '컬럼 설정',
+            children: (
+              <div>
+                <Table
+                  columns={tableColumns}
+                  dataSource={columnConfigs}
+                  pagination={false}
+                  size="small"
+                  rowKey="name"
+                  style={{ marginBottom: 16 }}
+                />
+              </div>
+            )
+          },
+          {
+            key: '2',
+            label: '기본 설정',
+            children: (
+              <Space direction="vertical" style={{ width: '100%' }}>
+                <Row gutter={[16, 16]}>
+                  <Col span={12}>
+                    <Card size="small">
+                      <div style={{ textAlign: 'center' }}>
+                        <Text style={{ fontSize: '12px', display: 'block', marginBottom: 8 }}>헤더 포함</Text>
+                        <Switch
+                          checked={includeHeader}
+                          onChange={setIncludeHeader}
+                          size="small"
+                        />
+                      </div>
+                    </Card>
+                  </Col>
+                  <Col span={12}>
+                    <Card size="small">
+                      <div style={{ textAlign: 'center' }}>
+                        <Text style={{ fontSize: '12px', display: 'block', marginBottom: 8 }}>데이터 길이 포함</Text>
+                        <Switch
+                          checked={includeDataInLength}
+                          onChange={handleIncludeDataInLengthChange}
+                          size="small"
+                        />
+                      </div>
+                    </Card>
+                  </Col>
+                </Row>
+                
+                <Card size="small">
+                  <Text style={{ fontSize: '12px', display: 'block', marginBottom: 8 }}>셀 간 구분자</Text>
+                  <Select
+                    value={separator}
+                    onChange={setSeparator}
+                    style={{ width: '100%' }}
+                    size="small"
+                  >
+                    <Option value="">없음</Option>
+                    <Option value=" ">공백</Option>
+                    <Option value="-">대시</Option>
+                    <Option value="_">언더바</Option>
+                    <Option value="custom">커스텀</Option>
+                  </Select>
+                  
+                  {separator === 'custom' && (
+                    <div style={{ marginTop: 8 }}>
+                      <Input
+                        value={customSeparator}
+                        onChange={(e) => setCustomSeparator(e.target.value)}
+                        placeholder="구분자 입력"
+                        size="small"
+                        maxLength={5}
+                      />
+                    </div>
+                  )}
+                </Card>
+              </Space>
+            )
+          },
+          {
+            key: '3',
+            label: '미리보기',
+            children: (
+              <Space direction="vertical" style={{ width: '100%' }}>
+                <Card size="small">
+                  <Text type="secondary" style={{ fontSize: '12px' }}>
+                    {includeHeader ? '헤더 + 첫 번째 행 미리보기:' : '첫 번째 행 미리보기:'}
+                  </Text>
+                  <div style={{ 
+                    marginTop: 8, 
+                    padding: '8px 12px', 
+                    background: '#f5f5f5', 
+                    borderRadius: '4px',
+                    fontSize: '12px',
+                    wordBreak: 'break-all',
+                    fontFamily: 'monospace',
+                    minHeight: '60px'
+                  }}>
+                    {getPreview()}
+                  </div>
+                </Card>
+                
+                <Card size="small">
+                  <div style={{ fontSize: '12px', color: '#666' }}>
+                    <div>• 총 행 수: {data.length}개 {includeHeader ? '(헤더 포함)' : ''}</div>
+                    <div>• 선택된 컬럼: {getEnabledConfigs().length}개 / 전체 {columnConfigs.length}개</div>
+                    <div>• 행당 셀 수: {getCellsPerRow()}개 {includeDataInLength ? '(데이터 포함)' : '(데이터 + 빈칸)'}</div>
+                    <div style={{ 
+                      color: getTotalCells() > 16384 ? '#ff4d4f' : '#666',
+                      fontWeight: getTotalCells() > 16384 ? 'bold' : 'normal'
+                    }}>
+                      • 최종 총 셀 수: {getTotalCells().toLocaleString()}개
+                      {getTotalCells() > 16384 && (
+                        <span style={{ color: '#ff4d4f', fontSize: '10px', marginLeft: 8 }}>
+                          (Excel 한계 초과!)
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </Card>
+              </Space>
+            )
+          },
+          {
+            key: '4',
+            label: '프리셋',
+            children: (
+              <Row gutter={[16, 16]}>
+                <Col span={12}>
+                  <Button
+                    icon={<SaveOutlined />}
+                    onClick={handleSavePreset}
+                    style={{ width: '100%' }}
+                    size="large"
+                  >
+                    프리셋 저장
+                  </Button>
+                </Col>
+                <Col span={12}>
+                  <Button
+                    icon={<FolderOpenOutlined />}
+                    onClick={handleLoadPreset}
+                    style={{ width: '100%' }}
+                    size="large"
+                  >
+                    프리셋 불러오기
+                  </Button>
+                </Col>
+              </Row>
+            )
+          }
+        ]}
+      />
 
       {/* 프리셋 저장 모달 */}
       <Modal

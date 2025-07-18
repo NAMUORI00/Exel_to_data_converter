@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="256" height="256" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
+  <!-- 배경 그라데이션 -->
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#2E7D32;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1B5E20;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="excelGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4CAF50;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#388E3C;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="arrowGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFD54F;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FFA726;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- 배경 원 -->
+  <circle cx="128" cy="128" r="120" fill="url(#bgGradient)" stroke="#1B5E20" stroke-width="3"/>
+  
+  <!-- 왼쪽 Excel 테이블 표현 -->
+  <g transform="translate(40, 70)">
+    <!-- Excel 배경 -->
+    <rect x="0" y="0" width="60" height="45" rx="4" fill="url(#excelGradient)" stroke="#2E7D32" stroke-width="2"/>
+    
+    <!-- Excel 그리드 -->
+    <line x1="0" y1="15" x2="60" y2="15" stroke="#1B5E20" stroke-width="1"/>
+    <line x1="0" y1="30" x2="60" y2="30" stroke="#1B5E20" stroke-width="1"/>
+    <line x1="20" y1="0" x2="20" y2="45" stroke="#1B5E20" stroke-width="1"/>
+    <line x1="40" y1="0" x2="40" y2="45" stroke="#1B5E20" stroke-width="1"/>
+    
+    <!-- 데이터 표현 (작은 사각형들) -->
+    <rect x="3" y="3" width="14" height="9" fill="#E8F5E8" rx="1"/>
+    <rect x="23" y="3" width="14" height="9" fill="#E8F5E8" rx="1"/>
+    <rect x="43" y="3" width="14" height="9" fill="#E8F5E8" rx="1"/>
+    <rect x="3" y="18" width="14" height="9" fill="#C8E6C9" rx="1"/>
+    <rect x="23" y="18" width="14" height="9" fill="#C8E6C9" rx="1"/>
+    <rect x="43" y="18" width="14" height="9" fill="#C8E6C9" rx="1"/>
+    <rect x="3" y="33" width="14" height="9" fill="#A5D6A7" rx="1"/>
+    <rect x="23" y="33" width="14" height="9" fill="#A5D6A7" rx="1"/>
+    <rect x="43" y="33" width="14" height="9" fill="#A5D6A7" rx="1"/>
+  </g>
+  
+  <!-- 변환 화살표 -->
+  <g transform="translate(120, 85)">
+    <path d="M0,15 L30,15 L25,5 L35,20 L25,35 L30,25 L0,25 Z" fill="url(#arrowGradient)" stroke="#F57C00" stroke-width="2"/>
+  </g>
+  
+  <!-- 오른쪽 단일 행 표현 -->
+  <g transform="translate(156, 85)">
+    <!-- 단일 행 배경 -->
+    <rect x="0" y="0" width="60" height="30" rx="4" fill="url(#excelGradient)" stroke="#2E7D32" stroke-width="2"/>
+    
+    <!-- 단일 행 구분선 -->
+    <line x1="10" y1="0" x2="10" y2="30" stroke="#1B5E20" stroke-width="1"/>
+    <line x1="20" y1="0" x2="20" y2="30" stroke="#1B5E20" stroke-width="1"/>
+    <line x1="30" y1="0" x2="30" y2="30" stroke="#1B5E20" stroke-width="1"/>
+    <line x1="40" y1="0" x2="40" y2="30" stroke="#1B5E20" stroke-width="1"/>
+    <line x1="50" y1="0" x2="50" y2="30" stroke="#1B5E20" stroke-width="1"/>
+    
+    <!-- 통합된 데이터 표현 -->
+    <rect x="2" y="5" width="6" height="20" fill="#FFE0B2" rx="1"/>
+    <rect x="12" y="5" width="6" height="20" fill="#FFCC02" rx="1"/>
+    <rect x="22" y="5" width="6" height="20" fill="#FFE0B2" rx="1"/>
+    <rect x="32" y="5" width="6" height="20" fill="#FFCC02" rx="1"/>
+    <rect x="42" y="5" width="6" height="20" fill="#FFE0B2" rx="1"/>
+    <rect x="52" y="5" width="6" height="20" fill="#FFCC02" rx="1"/>
+  </g>
+  
+  <!-- 하단 텍스트 -->
+  <text x="128" y="200" font-family="Arial, sans-serif" font-size="14" font-weight="bold" text-anchor="middle" fill="#FFFFFF">
+    Excel Data
+  </text>
+  <text x="128" y="218" font-family="Arial, sans-serif" font-size="14" font-weight="bold" text-anchor="middle" fill="#FFFFFF">
+    Converter
+  </text>
+  
+  <!-- 장식 요소 -->
+  <circle cx="50" cy="50" r="3" fill="#4CAF50" opacity="0.7"/>
+  <circle cx="206" cy="50" r="3" fill="#4CAF50" opacity="0.7"/>
+  <circle cx="50" cy="206" r="3" fill="#4CAF50" opacity="0.7"/>
+  <circle cx="206" cy="206" r="3" fill="#4CAF50" opacity="0.7"/>
+</svg>
