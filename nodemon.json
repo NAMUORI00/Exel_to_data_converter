@@ -1,0 +1,10 @@
+{
+  "watch": ["dist/main.js"],
+  "ext": "js",
+  "exec": "npx electron . --enable-logging",
+  "env": {
+    "NODE_ENV": "development"
+  },
+  "delay": "1000",
+  "verbose": true
+}

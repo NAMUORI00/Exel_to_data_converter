@@ -10,6 +10,17 @@ module.exports = [
     entry: './src/main.ts',
     target: 'electron-main',
     devtool: isDevelopment ? 'inline-source-map' : false,
+    cache: isDevelopment ? {
+      type: 'filesystem',
+      buildDependencies: {
+        config: [__filename],
+      },
+    } : false,
+    watchOptions: {
+      ignored: /node_modules/,
+      aggregateTimeout: 300,
+      poll: 1000,
+    },
     module: {
       rules: [
         {
@@ -17,7 +28,10 @@ module.exports = [
           use: {
             loader: 'ts-loader',
             options: {
-              transpileOnly: true,
+              transpileOnly: isDevelopment,
+              compilerOptions: {
+                incremental: isDevelopment,
+              },
             },
           },
           exclude: /node_modules/,
@@ -30,10 +44,14 @@ module.exports = [
     output: {
       path: path.resolve(__dirname, 'dist'),
       filename: 'main.js',
+      clean: false,
     },
     node: {
       __dirname: false,
       __filename: false,
+    },
+    stats: {
+      errorDetails: true,
     },
   },
   // Renderer process configuration
@@ -42,6 +60,17 @@ module.exports = [
     entry: './src/renderer/index.tsx',
     target: 'electron-renderer',
     devtool: isDevelopment ? 'inline-source-map' : false,
+    cache: isDevelopment ? {
+      type: 'filesystem',
+      buildDependencies: {
+        config: [__filename],
+      },
+    } : false,
+    watchOptions: {
+      ignored: /node_modules/,
+      aggregateTimeout: 300,
+      poll: 1000,
+    },
     module: {
       rules: [
         {
@@ -49,7 +78,10 @@ module.exports = [
           use: {
             loader: 'ts-loader',
             options: {
-              transpileOnly: true,
+              transpileOnly: isDevelopment,
+              compilerOptions: {
+                incremental: isDevelopment,
+              },
             },
           },
           exclude: /node_modules/,
@@ -66,12 +98,17 @@ module.exports = [
     output: {
       path: path.resolve(__dirname, 'dist'),
       filename: 'renderer.js',
+      clean: false,
     },
     plugins: [
       new HtmlWebpackPlugin({
         template: './src/renderer/index.html',
         filename: 'index.html',
+        cache: isDevelopment,
       }),
     ],
+    stats: {
+      errorDetails: true,
+    },
   },
 ];

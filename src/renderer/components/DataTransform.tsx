@@ -551,6 +551,54 @@ const DataTransform: React.FC<DataTransformProps> = ({ data, onTransform }) => {
         />
       )}
 
+      {/* 미리보기 카드 - 상단에 배치 */}
+      <Card size="small" style={{ marginBottom: 16 }}>
+        <Space direction="vertical" style={{ width: '100%' }}>
+          <div>
+            <Text type="secondary" style={{ fontSize: '12px' }}>
+              {includeHeader ? '헤더 + 첫 번째 행 미리보기:' : '첫 번째 행 미리보기:'}
+            </Text>
+            <div style={{ 
+              marginTop: 8, 
+              padding: '8px 12px', 
+              background: '#f5f5f5', 
+              borderRadius: '4px',
+              fontSize: '12px',
+              wordBreak: 'break-all',
+              fontFamily: 'monospace',
+              minHeight: '40px'
+            }}>
+              {getPreview()}
+            </div>
+          </div>
+          
+          <Divider style={{ margin: '12px 0' }} />
+          
+          <div style={{ fontSize: '12px', color: '#666' }}>
+            <Row gutter={16}>
+              <Col span={12}>
+                <div>• 총 행 수: {data.length}개 {includeHeader ? '(헤더 포함)' : ''}</div>
+                <div>• 선택된 컬럼: {getEnabledConfigs().length}개 / 전체 {columnConfigs.length}개</div>
+              </Col>
+              <Col span={12}>
+                <div>• 행당 셀 수: {getCellsPerRow()}개 {includeDataInLength ? '(데이터 포함)' : '(데이터 + 빈칸)'}</div>
+                <div style={{ 
+                  color: getTotalCells() > 16384 ? '#ff4d4f' : '#666',
+                  fontWeight: getTotalCells() > 16384 ? 'bold' : 'normal'
+                }}>
+                  • 최종 총 셀 수: {getTotalCells().toLocaleString()}개
+                  {getTotalCells() > 16384 && (
+                    <span style={{ color: '#ff4d4f', fontSize: '10px', marginLeft: 8 }}>
+                      (Excel 한계 초과!)
+                    </span>
+                  )}
+                </div>
+              </Col>
+            </Row>
+          </div>
+        </Space>
+      </Card>
+
       {/* 변환 실행 버튼 */}
       <Button
         type="primary"
@@ -579,7 +627,7 @@ const DataTransform: React.FC<DataTransformProps> = ({ data, onTransform }) => {
         </Card>
       )}
 
-      {/* 설정 탭 */}
+      {/* 설정 탭 - 2개로 통합 */}
       <Tabs 
         defaultActiveKey="1"
         items={[
@@ -601,36 +649,41 @@ const DataTransform: React.FC<DataTransformProps> = ({ data, onTransform }) => {
           },
           {
             key: '2',
-            label: '기본 설정',
+            label: '옵션 및 프리셋',
             children: (
               <Space direction="vertical" style={{ width: '100%' }}>
-                <Row gutter={[16, 16]}>
-                  <Col span={12}>
-                    <Card size="small">
-                      <div style={{ textAlign: 'center' }}>
-                        <Text style={{ fontSize: '12px', display: 'block', marginBottom: 8 }}>헤더 포함</Text>
-                        <Switch
-                          checked={includeHeader}
-                          onChange={setIncludeHeader}
-                          size="small"
-                        />
-                      </div>
-                    </Card>
-                  </Col>
-                  <Col span={12}>
-                    <Card size="small">
-                      <div style={{ textAlign: 'center' }}>
-                        <Text style={{ fontSize: '12px', display: 'block', marginBottom: 8 }}>데이터 길이 포함</Text>
-                        <Switch
-                          checked={includeDataInLength}
-                          onChange={handleIncludeDataInLengthChange}
-                          size="small"
-                        />
-                      </div>
-                    </Card>
-                  </Col>
-                </Row>
+                {/* 기본 설정 섹션 */}
+                <div>
+                  <Text strong style={{ fontSize: '13px', marginBottom: 8, display: 'block' }}>기본 설정</Text>
+                  <Row gutter={[16, 16]}>
+                    <Col span={12}>
+                      <Card size="small">
+                        <div style={{ textAlign: 'center' }}>
+                          <Text style={{ fontSize: '12px', display: 'block', marginBottom: 8 }}>헤더 포함</Text>
+                          <Switch
+                            checked={includeHeader}
+                            onChange={setIncludeHeader}
+                            size="small"
+                          />
+                        </div>
+                      </Card>
+                    </Col>
+                    <Col span={12}>
+                      <Card size="small">
+                        <div style={{ textAlign: 'center' }}>
+                          <Text style={{ fontSize: '12px', display: 'block', marginBottom: 8 }}>데이터 길이 포함</Text>
+                          <Switch
+                            checked={includeDataInLength}
+                            onChange={handleIncludeDataInLengthChange}
+                            size="small"
+                          />
+                        </div>
+                      </Card>
+                    </Col>
+                  </Row>
+                </div>
                 
+                {/* 구분자 설정 */}
                 <Card size="small">
                   <Text style={{ fontSize: '12px', display: 'block', marginBottom: 8 }}>셀 간 구분자</Text>
                   <Select
@@ -658,79 +711,34 @@ const DataTransform: React.FC<DataTransformProps> = ({ data, onTransform }) => {
                     </div>
                   )}
                 </Card>
-              </Space>
-            )
-          },
-          {
-            key: '3',
-            label: '미리보기',
-            children: (
-              <Space direction="vertical" style={{ width: '100%' }}>
-                <Card size="small">
-                  <Text type="secondary" style={{ fontSize: '12px' }}>
-                    {includeHeader ? '헤더 + 첫 번째 행 미리보기:' : '첫 번째 행 미리보기:'}
-                  </Text>
-                  <div style={{ 
-                    marginTop: 8, 
-                    padding: '8px 12px', 
-                    background: '#f5f5f5', 
-                    borderRadius: '4px',
-                    fontSize: '12px',
-                    wordBreak: 'break-all',
-                    fontFamily: 'monospace',
-                    minHeight: '60px'
-                  }}>
-                    {getPreview()}
-                  </div>
-                </Card>
                 
-                <Card size="small">
-                  <div style={{ fontSize: '12px', color: '#666' }}>
-                    <div>• 총 행 수: {data.length}개 {includeHeader ? '(헤더 포함)' : ''}</div>
-                    <div>• 선택된 컬럼: {getEnabledConfigs().length}개 / 전체 {columnConfigs.length}개</div>
-                    <div>• 행당 셀 수: {getCellsPerRow()}개 {includeDataInLength ? '(데이터 포함)' : '(데이터 + 빈칸)'}</div>
-                    <div style={{ 
-                      color: getTotalCells() > 16384 ? '#ff4d4f' : '#666',
-                      fontWeight: getTotalCells() > 16384 ? 'bold' : 'normal'
-                    }}>
-                      • 최종 총 셀 수: {getTotalCells().toLocaleString()}개
-                      {getTotalCells() > 16384 && (
-                        <span style={{ color: '#ff4d4f', fontSize: '10px', marginLeft: 8 }}>
-                          (Excel 한계 초과!)
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </Card>
+                {/* 프리셋 섹션 */}
+                <div>
+                  <Text strong style={{ fontSize: '13px', marginBottom: 8, display: 'block' }}>프리셋 관리</Text>
+                  <Row gutter={[16, 16]}>
+                    <Col span={12}>
+                      <Button
+                        icon={<SaveOutlined />}
+                        onClick={handleSavePreset}
+                        style={{ width: '100%' }}
+                        size="large"
+                      >
+                        프리셋 저장
+                      </Button>
+                    </Col>
+                    <Col span={12}>
+                      <Button
+                        icon={<FolderOpenOutlined />}
+                        onClick={handleLoadPreset}
+                        style={{ width: '100%' }}
+                        size="large"
+                      >
+                        프리셋 불러오기
+                      </Button>
+                    </Col>
+                  </Row>
+                </div>
               </Space>
-            )
-          },
-          {
-            key: '4',
-            label: '프리셋',
-            children: (
-              <Row gutter={[16, 16]}>
-                <Col span={12}>
-                  <Button
-                    icon={<SaveOutlined />}
-                    onClick={handleSavePreset}
-                    style={{ width: '100%' }}
-                    size="large"
-                  >
-                    프리셋 저장
-                  </Button>
-                </Col>
-                <Col span={12}>
-                  <Button
-                    icon={<FolderOpenOutlined />}
-                    onClick={handleLoadPreset}
-                    style={{ width: '100%' }}
-                    size="large"
-                  >
-                    프리셋 불러오기
-                  </Button>
-                </Col>
-              </Row>
             )
           }
         ]}

@@ -72,7 +72,7 @@ const App: React.FC = () => {
 
   return (
     <Layout style={{ height: '100vh' }}>
-      <Header style={{ background: '#fff', padding: '0 24px', borderBottom: '1px solid #f0f0f0' }}>
+      <Header style={{ background: '#fff', padding: '16px 24px', borderBottom: '1px solid #f0f0f0', height: 'auto' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <Title level={3} style={{ margin: 0, color: '#1890ff' }}>
             <FileExcelOutlined style={{ marginRight: 8 }} />
