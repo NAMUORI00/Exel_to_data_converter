@@ -1,0 +1,84 @@
+# Electron Builder Configuration
+appId: com.company.excel-converter
+productName: Excel Data Converter
+
+directories:
+  output: release
+  buildResources: assets
+
+files:
+  - dist/**/*
+  - node_modules/**/*
+  - package.json
+  - "!**/*.ts"
+  - "!**/*.tsx"
+  - "!src/**/*"
+  - "!.git/**/*"
+  - "!.gitignore"
+  - "!README.md"
+  - "!webpack.config.js"
+  - "!tsconfig.json"
+  - "!nodemon.json"
+  - "!dev.bat"
+  - "!test-data/**/*"
+  - "!scripts/**/*"
+
+# 압축 설정 - 단일 파일 크기 최소화
+compression: maximum
+npmRebuild: true
+nodeGypRebuild: false
+
+# Windows 설정
+win:
+  target:
+    - target: portable
+      arch:
+        - x64
+    - target: nsis
+      arch:
+        - x64
+  icon: assets/icon.ico
+  certificateFile: null
+  certificatePassword: null
+  verifyUpdateCodeSignature: false
+  publisherName: Excel Data Converter
+  requestedExecutionLevel: asInvoker
+  signAndEditExecutable: false
+
+# 포터블 실행 파일 설정
+portable:
+  artifactName: ExcelDataConverter-Portable-${version}.exe
+  unicode: true
+  requestExecutionLevel: user
+  unpackDirName: excel-data-converter-portable
+
+# NSIS 설치 프로그램 설정
+nsis:
+  artifactName: ExcelDataConverter-Setup-${version}.exe
+  oneClick: true
+  perMachine: false
+  allowElevation: false
+  allowToChangeInstallationDirectory: false
+  createDesktopShortcut: false
+  createStartMenuShortcut: true
+  shortcutName: Excel Data Converter
+  unicode: true
+  deleteAppDataOnUninstall: true
+  packElevateHelper: false
+  installerIcon: assets/icon.ico
+  uninstallerIcon: assets/icon.ico
+  installerHeaderIcon: assets/icon.ico
+  runAfterFinish: true
+  warningsAsErrors: false
+
+# 추가 메타데이터
+extraMetadata:
+  main: dist/main.js
+  author: namuori00
+  
+# 리소스 관리
+extraResources:
+  - from: assets/
+    to: assets/
+    filter:
+      - "**/*"

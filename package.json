@@ -15,6 +15,8 @@
     "rebuild": "npm run clean && npm run build",
     "typecheck": "tsc --noEmit",
     "build:win": "electron-builder --win",
+    "build:portable": "npm run build && electron-builder --win portable",
+    "build:setup": "npm run build && electron-builder --win nsis",
     "dist": "npm run build && electron-builder",
     "postinstall": "electron-builder install-app-deps",
     "test": "echo \"No tests specified\" && exit 0"
@@ -46,6 +48,7 @@
     "electron-builder": "^24.9.1",
     "html-webpack-plugin": "^5.6.0",
     "nodemon": "^3.0.2",
+    "png-to-ico": "^2.1.8",
     "rimraf": "^5.0.5",
     "style-loader": "^3.3.3",
     "ts-loader": "^9.5.1",
@@ -65,18 +68,41 @@
       "node_modules/**/*",
       "package.json"
     ],
+    "compression": "maximum",
+    "nsis": {
+      "artifactName": "ExcelDataConverter-Setup.exe",
+      "oneClick": true,
+      "perMachine": false,
+      "allowElevation": false,
+      "allowToChangeInstallationDirectory": false,
+      "createDesktopShortcut": false,
+      "createStartMenuShortcut": false,
+      "shortcutName": "Excel Data Converter",
+      "unicode": true,
+      "deleteAppDataOnUninstall": true,
+      "packElevateHelper": false
+    },
     "win": {
       "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
         {
           "target": "portable",
           "arch": [
             "x64"
           ]
         }
-      ]
+      ],
+      "icon": "assets/icon.ico"
     },
     "portable": {
-      "artifactName": "Excel-Data-Converter-Portable.exe"
+      "artifactName": "ExcelDataConverter-Portable.exe",
+      "unicode": true,
+      "requestExecutionLevel": "user"
     },
     "extraMetadata": {
       "main": "dist/main.js"
